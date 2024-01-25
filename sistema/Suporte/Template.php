@@ -78,6 +78,11 @@ class Template
                                 return Helpers::contarTempo($data);
                             })
             ),
+            $this->twig->addFunction(
+                    new \Twig\TwigFunction('formatarNumero', function (int $numero) {
+                                return Helpers::formatarNumero($numero);
+                            })
+            ),
         );
     }
 

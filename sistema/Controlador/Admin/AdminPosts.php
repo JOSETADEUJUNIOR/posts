@@ -5,6 +5,7 @@ namespace sistema\Controlador\Admin;
 use sistema\Modelo\PostModelo;
 use sistema\Modelo\CategoriaModelo;
 use sistema\Nucleo\Helpers;
+use Verot\Upload\Upload;
 
 /**
  * Classe AdminPosts
@@ -13,6 +14,8 @@ use sistema\Nucleo\Helpers;
  */
 class AdminPosts extends AdminControlador
 {
+
+    private string $capa;
 
     /**
      * Lista posts
@@ -45,11 +48,12 @@ class AdminPosts extends AdminControlador
                 $post = new PostModelo();
 
                 $post->usuario_id = $this->usuario->id;
-                $post->titulo = $dados['titulo'];
                 $post->categoria_id = $dados['categoria_id'];
-                $post->slug = Helpers::slug($dados['titulo']).'-'. uniqid();
+                $post->slug = Helpers::slug($dados['titulo']);
+                $post->titulo = $dados['titulo'];
                 $post->texto = $dados['texto'];
                 $post->status = $dados['status'];
+                $post->capa = $this->capa ?? null;
 
                 if ($post->salvar()) {
                     $this->mensagem->sucesso('Post cadastrado com sucesso')->flash();
@@ -60,6 +64,7 @@ class AdminPosts extends AdminControlador
                 }
             }
         }
+
         echo $this->template->renderizar('posts/formulario.html', [
             'categorias' => (new CategoriaModelo())->busca('status = 1')->resultado(true),
             'post' => $dados
@@ -82,12 +87,20 @@ class AdminPosts extends AdminControlador
                 $post = (new PostModelo())->buscaPorId($id);
 
                 $post->usuario_id = $this->usuario->id;
-                $post->titulo = $dados['titulo'];
                 $post->categoria_id = $dados['categoria_id'];
-                $post->slug = Helpers::slug($dados['titulo']).'-'. uniqid();
+                $post->slug = Helpers::slug($dados['titulo']);
+                $post->titulo = $dados['titulo'];
                 $post->texto = $dados['texto'];
                 $post->status = $dados['status'];
                 $post->atualizado_em = date('Y-m-d H:i:s');
+
+                if (!empty($_FILES['capa'])) {
+                    if ($post->capa && file_exists("uploads/imagens/{$post->capa}")) {
+                        unlink("uploads/imagens/{$post->capa}");
+                        unlink("uploads/imagens/thumbs/{$post->capa}");
+                    }
+                    $post->capa = $this->capa ?? null;
+                }
 
                 if ($post->salvar()) {
                     $this->mensagem->sucesso('Post atualizado com sucesso')->flash();
@@ -101,7 +114,7 @@ class AdminPosts extends AdminControlador
 
         echo $this->template->renderizar('posts/formulario.html', [
             'post' => $post,
-            'categorias' => (new CategoriaModelo())->busca()
+            'categorias' => (new CategoriaModelo())->busca('status = 1')->resultado(true)
         ]);
     }
 
@@ -112,6 +125,7 @@ class AdminPosts extends AdminControlador
      */
     public function validarDados(array $dados): bool
     {
+
         if (empty($dados['titulo'])) {
             $this->mensagem->alerta('Escreva um título para o Post!')->flash();
             return false;
@@ -119,6 +133,31 @@ class AdminPosts extends AdminControlador
         if (empty($dados['texto'])) {
             $this->mensagem->alerta('Escreva um texto para o Post!')->flash();
             return false;
+        }
+
+        if (!empty($_FILES['capa'])) {
+            $upload = new Upload($_FILES['capa'], 'pt_BR');
+            if ($upload->uploaded) {
+                $titulo = $upload->file_new_name_body = Helpers::slug($dados['titulo']);
+                $upload->jpeg_quality = 90;
+                $upload->image_convert = 'jpg';
+                $upload->process('uploads/imagens/');
+
+                if ($upload->processed) {
+                    $this->capa = $upload->file_dst_name;
+                    $upload->file_new_name_body = $titulo;
+                    $upload->image_resize = true;
+                    $upload->image_x = 540;
+                    $upload->image_y = 304;
+                    $upload->jpeg_quality = 70;
+                    $upload->image_convert = 'jpg';
+                    $upload->process('uploads/imagens/thumbs/');
+                    $upload->clean();
+                } else {
+                    $this->mensagem->alerta($upload->error)->flash();
+                    return false;
+                }
+            }
         }
 
         return true;
@@ -138,6 +177,12 @@ class AdminPosts extends AdminControlador
                 Helpers::redirecionar('admin/posts/listar');
             } else {
                 if ($post->deletar()) {
+
+                    if ($post->capa && file_exists("uploads/imagens/{$post->capa}")) {
+                        unlink("uploads/imagens/{$post->capa}");
+                        unlink("uploads/imagens/thumbs/{$post->capa}");
+                    }
+
                     $this->mensagem->sucesso('Post deletado com sucesso!')->flash();
                     Helpers::redirecionar('admin/posts/listar');
                 } else {

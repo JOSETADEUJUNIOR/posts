@@ -180,7 +180,7 @@
                                                 Escrito por {{post.usuario.nome}} {{ contarTempo(post.cadastrado_em) }} {{post.categoria.titulo}}
                                             </small>
                                         </th>
-                                        <td class="text-center">{{post.visitas}}</td>
+                                        <td class="text-center">{{formatarNumero(post.visitas)}}</td>
                                         <td class="text-center">
 
                                             <a href="{{ url('admin/posts/editar/'~post.id) }}" tooltip="tooltip" title="Editar">
@@ -223,23 +223,28 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        
+
                                         <th>Título</th>
-                                        <th class="text-center">Status</th>
+                                        <th class="text-center">Visitas</th>
                                         <th class="text-center">Ação</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for categoria in categorias.categorias %}
                                     <tr>
-                                        
-                                        <td>{{categoria.titulo}}</td>
+
+                                        <td>
+                                            <span>
+                                                {% if categoria.status == 1 %}
+                                                <i class="fa-solid fa-circle text-success" tooltip="tooltip" title="Ativo"></i>
+                                                {% else %}
+                                                <i class="fa-solid fa-circle text-danger" tooltip="tooltip" title="Inativo"></i>
+                                                {% endif %}
+                                            </span>
+                                            {{categoria.titulo}}
+                                        </td>
                                         <td class="text-center">
-                                            {% if categoria.status == 1 %}
-                                            <i class="fa-solid fa-circle text-success" tooltip="tooltip" title="Ativo"></i>
-                                            {% else %}
-                                            <i class="fa-solid fa-circle text-danger" tooltip="tooltip" title="Inativo"></i>
-                                            {% endif %}
+                                            {{formatarNumero(categoria.visitas)}}
                                         </td>
                                         <td class="text-center">
                                             <a href="{{ url('admin/categorias/editar/'~categoria.id) }}" tooltip="tooltip" title="Editar">

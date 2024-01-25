@@ -42,8 +42,8 @@
                     {% for categoria in categorias %}
                     <tr>
                         <th>{{categoria.id}}</th>
-                        <td>{{categoria.titulo}}</td>
-                        <td class="text-center">0</td>
+                        <td class="fw-bold">{{categoria.titulo}}</td>
+                        <td class="text-center">{{categoria.visitas}}</td>
                         <td class="text-center">
                             {% if categoria.status == 1 %}
                             <i class="fa-solid fa-circle text-success" tooltip="tooltip" title="Ativo"></i>

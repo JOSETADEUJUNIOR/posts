@@ -40,5 +40,15 @@ class PostModelo extends Modelo
         }
         return null;
     }
+    
+    /**
+     * Salva o post com slug
+     * @return bool
+     */
+    public function salvar(): bool
+    {
+        $this->slug();
+        return parent::salvar();
+    }
 
 }

@@ -40,10 +40,10 @@ class AdminCategorias extends AdminControlador
         $dados = filter_input_array(INPUT_POST, FILTER_DEFAULT);
         if (isset($dados)) {
             if ($this->validarDados($dados)) {
-
                 $categoria = new CategoriaModelo();
 
                 $categoria->usuario_id = $this->usuario->id;
+                $categoria->slug = Helpers::slug($dados['titulo']);
                 $categoria->titulo = $dados['titulo'];
                 $categoria->texto = $dados['texto'];
                 $categoria->status = $dados['status'];
@@ -78,6 +78,7 @@ class AdminCategorias extends AdminControlador
                 $categoria = (new CategoriaModelo())->buscaPorId($categoria->id);
 
                 $categoria->usuario_id = $this->usuario->id;
+                $categoria->slug = Helpers::slug($dados['titulo']);
                 $categoria->titulo = $dados['titulo'];
                 $categoria->texto = $dados['texto'];
                 $categoria->status = $dados['status'];
@@ -117,21 +118,18 @@ class AdminCategorias extends AdminControlador
      * @param int $id
      * @return void
      */
-       public function deletar(int $id): void
+    public function deletar(int $id): void
     {
         if (is_int($id)) {
-            $categoria = (new CategoriaModelo())->buscaPorId($id); 
-            
+            $categoria = (new CategoriaModelo())->buscaPorId($id);
+
             if (!$categoria) {
                 $this->mensagem->alerta('O categoria que você está tentando deletar não existe!')->flash();
                 Helpers::redirecionar('admin/categorias/listar');
-            } 
-            elseif($categoria->posts($categoria->id)){
+            } elseif ($categoria->posts($categoria->id)) {
                 $this->mensagem->alerta("A categoria {$categoria->titulo} tem posts cadastrados, delete ou altere os posts antes de deletar!")->flash();
-                Helpers::redirecionar('admin/categorias/listar'); 
-            }
-            
-            else {
+                Helpers::redirecionar('admin/categorias/listar');
+            } else {
                 if ($categoria->deletar()) {
                     $this->mensagem->sucesso('Categoria deletada com sucesso!')->flash();
                     Helpers::redirecionar('admin/categorias/listar');

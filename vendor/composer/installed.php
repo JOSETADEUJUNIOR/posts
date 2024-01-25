@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'ceounset/cursophp8',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => NULL,
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => 'ce4c16121837f1ff96593290ca02037c1b65ea99',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,12 +11,23 @@
     ),
     'versions' => array(
         'ceounset/cursophp8' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => NULL,
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => 'ce4c16121837f1ff96593290ca02037c1b65ea99',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'digitalnature/php-ref' => array(
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => '2381f04d7ebcbce1072e86b98a0ccbad191f3290',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../digitalnature/php-ref',
+            'aliases' => array(
+                0 => '9999999-dev',
+            ),
             'dev_requirement' => false,
         ),
         'pecee/simple-router' => array(
@@ -59,6 +70,17 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../twig/twig',
             'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'verot/class.upload.php' => array(
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => 'befbccc2330b0ccb148fc87495896bd7b57f8c57',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../verot/class.upload.php',
+            'aliases' => array(
+                0 => '9999999-dev',
+            ),
             'dev_requirement' => false,
         ),
     ),

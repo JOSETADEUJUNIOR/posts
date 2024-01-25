@@ -47,17 +47,15 @@ class SiteControlador extends Controlador
      * @param int $id
      * @return void
      */
-    public function post(string $slug):void
+    public function post(string $slug): void
     {
         $post = (new PostModelo())->buscaPorSlug($slug);
-        if(!$post){
+        if (!$post) {
             Helpers::redirecionar('404');
         }
-        
-        $post->visitas += 1;
-        $post->ultima_visita_em = date('Y-m-d H:i:s');
-        $post->salvar();
-        
+
+        $post->salvarVisitas();
+
         echo $this->template->renderizar('post.html', [
             'post' => $post,
             'categorias' => $this->categorias(),
