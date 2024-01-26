@@ -6,6 +6,7 @@ use sistema\Nucleo\Controlador;
 use sistema\Modelo\PostModelo;
 use sistema\Nucleo\Helpers;
 use sistema\Modelo\CategoriaModelo;
+use sistema\Biblioteca\Paginar;
 
 class SiteControlador extends Controlador
 {
@@ -22,9 +23,13 @@ class SiteControlador extends Controlador
     public function index(): void
     {
         $posts = (new PostModelo())->busca("status = 1");
-        
+
         echo $this->template->renderizar('index.html', [
-            'posts' => $posts->resultado(true),
+            'posts' => [
+                'slides' => $posts->ordem('id DESC')->limite(3)->resultado(true),
+                'posts' => $posts->ordem('id DESC')->limite(10)->offset(3)->resultado(true),
+                'maisLidos' => (new PostModelo())->busca("status = 1")->ordem('visitas DESC')->limite(5)->resultado(true),
+            ],
             'categorias' => $this->categorias(),
         ]);
     }
@@ -71,12 +76,22 @@ class SiteControlador extends Controlador
         return (new CategoriaModelo())->busca("status = 1")->resultado(true);
     }
 
-    public function categoria(int $id):void
+    public function categoria(string $slug, int $pagina = null): void
     {
-        $posts = (new CategoriaModelo())->posts($id);
-        
+        $categoria = (new CategoriaModelo())->buscaPorSlug($slug);
+        if (!$categoria) {
+            Helpers::redirecionar('404');
+        }
+        $categoria->salvarVisitas();
+
+        $posts = (new PostModelo());
+        $total = $posts->busca('categoria_id = :c', "c={$categoria->id} COUNT(id)", 'id')->total(); 
+
+        $paginar = new Paginar(Helpers::url('categoria/'. $slug), ($pagina ?? 1), 3, 3, $total);
+
         echo $this->template->renderizar('categoria.html', [
-            'posts' => $posts,
+            'posts' => $posts->busca("categoria_id = {$categoria->id}")->limite($paginar->limite())->offset($paginar->offset())->resultado(true),
+            'paginacao' => $paginar->renderizar(),
             'categorias' => $this->categorias(),
         ]);
     }
@@ -88,9 +103,11 @@ class SiteControlador extends Controlador
     public function sobre(): void
     {
         echo $this->template->renderizar('sobre.html', [
-            'titulo' => 'Sobre nós'
+            'titulo' => 'Sobre nós',
+            'categorias' => $this->categorias(),
         ]);
     }
+
     
     /**
      * ERRO 404

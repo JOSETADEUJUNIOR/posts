@@ -5,7 +5,7 @@
                 <img src="{{ url('templates/site/assets/img/php-logo.svg') }}" alt="php8.1" height="22" width="60">
             </a>
 
-            <ul class="navbar navbar-dark bg-dark col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 list-unstyled">
+            <ul class="navbar navbar-dark bg-dark col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
                 <li>
                     <a href="{{ url() }}" class="nav-link px-2" tooltip="tooltip" title="Página Inicial">Home</a>
                 </li>
@@ -13,7 +13,6 @@
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Categorias
                     </a>
-                    {% if categorias %}
                     <ul class="dropdown-menu">
                         {% for categoria in categorias %}
                         <li>
@@ -23,13 +22,10 @@
                         </li>
                         {% endfor %}
                     </ul>
-                    {% else %}
-                    <div class="alert alert-warning">
-                        Nenhuma categoria cadastrada!
-                    </div>
-                    {% endif %}
                 </li>
-                 
+                <li>
+                    <a href="{{ url('sobre-nos') }}" class="nav-link px-2 text-white" tooltip="tooltip" title="Sobre Nós">Sobre nós</a>
+                </li>
             </ul>
 
             <form data-url-busca="{{ url('buscar') }}" class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
@@ -62,17 +58,15 @@
                     </ul>
                 </div>
                 {% elseif usuario().level == 1 %}
-<!--                Usuário Logado-->
+                Usuário Logado
                 {% else %}
-                <a data-bs-toggle="modal" data-bs-target="#modalLogin" class="btn btn-outline-light me-2" tooltip="tooltip" title="Faça login">
+                <a href="" class="btn btn-outline-light me-2" tooltip="tooltip" title="Faça login">
                     Entrar
                 </a>
-                <a data-bs-toggle="modal" data-bs-target="#modalCadastro" class="btn btn-warning" tooltip="tooltip" title="Junte-se a nós">
+                <a href="" class="btn btn-warning" tooltip="tooltip" title="Junte-se a nós">
                     Cadastre-se
                 </a>
                 {% endif %}
-                {% include 'modals/login.html' %}                
-                {% include 'modals/cadastro.html' %}
 
             </div>
         </div>

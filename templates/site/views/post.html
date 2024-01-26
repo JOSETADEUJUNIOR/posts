@@ -10,15 +10,15 @@
                 <small class="text-muted">Por {{post.usuario.nome}}, {{ post.cadastrado_em|date("d/m/Y") }} às {{ post.cadastrado_em|date("H:i") }} em {{post.categoria.titulo}}</small>
             </div>
 
-            <a
-                href="{{url('uploads/imagens/'~post.capa)}}"
-                data-fancybox="gallery"
-                data-caption="{{post.titulo}}"
-                >
-                <img src="{{url('uploads/imagens/thumbs/'~post.capa)}}" alt="{{post.titulo}}" title="{{post.titulo}}" class="capaGrande"/>
-            </a>
-
-            
+            {% if post.capa %}
+            <div class="float-xl-start float-lg-none capaGrande mx-auto">
+                <div class="card border-0">
+                    <a data-fancybox data-caption="{{post.titulo}}" class="overflow zoom " href="{{url('uploads/imagens/'~post.capa)}}">
+                        <img src="{{url('uploads/imagens/'~post.capa)}}" alt="{{post.titulo}}" title="{{post.titulo}}" />
+                    </a>
+                </div>
+            </div>
+            {% endif %}            
 
             <div class="texto">
                 <p>{{post.texto | raw}}</p>

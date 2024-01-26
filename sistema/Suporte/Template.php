@@ -83,6 +83,12 @@ class Template
                                 return Helpers::formatarNumero($numero);
                             })
             ),
+            $this->twig->addFunction(
+                new \Twig\TwigFunction('tempoCarregamento', function () {
+                            $time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
+                            return number_format($time, 4);
+                        })
+        ),
         );
     }
 

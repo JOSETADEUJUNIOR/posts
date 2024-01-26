@@ -200,7 +200,7 @@ abstract class Modelo
      * @param string $termos
      * @return int
      */
-    protected function atualizar(array $dados, string $termos): int
+    protected function atualizar(array $dados, string $termos): int | bool | null
     {
         try {
             $set = [];
