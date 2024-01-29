@@ -15,7 +15,8 @@ class UsuarioModelo extends Modelo
 {
     public function __construct()
     {
-        parent::__construct('usuarios');
+        $schema = 'posts';
+        parent::__construct('usuarios', $schema);
     }
     
     /**
@@ -38,7 +39,6 @@ class UsuarioModelo extends Modelo
     public function login(array $dados, int $level = 1)
     {
         $usuario = (new UsuarioModelo())->buscaPorEmail($dados['email']);
-        
         if(!$usuario){
             $this->mensagem->erro("Os dados informados para o login estão incorretos!")->flash();
             return false;
@@ -65,6 +65,7 @@ class UsuarioModelo extends Modelo
         
         //cria uma sessão com o id
         (new Sessao())->criar('usuarioId', $usuario->id);
+        (new Sessao())->criar('tenant_id', $usuario->tenant_id);
         
         $this->mensagem->sucesso("{$usuario->nome}, seja bem vindo ao painel de controle")->flash();
         return true;

@@ -14,10 +14,11 @@ class Conexao
 {
 
     private static $instancia;
+    private static $schema;
 
-    public static function getInstancia(): PDO
+    public static function getInstancia(string $schema): PDO
     {
-        if (empty(self::$instancia)) {
+        if (empty(self::$instancia) || self::$schema !== $schema) {
             try {
                 self::$instancia = new PDO('mysql:host=' . DB_HOST . ';port=' . DB_PORTA . ';dbname=' . DB_NOME, DB_USUARIO, DB_SENHA, [
                     //garante que o charset do PDO seja o mesmo do banco de dados
@@ -29,6 +30,8 @@ class Conexao
                     //garante que o mesmo nome das colunas do banco seja utilizado
                     PDO::ATTR_CASE => PDO::CASE_NATURAL
                 ]);
+
+                self::$schema = $schema;
             } catch (PDOException $ex) {
                 die("Erro de conexão:: " . $ex->getMessage());
             }            

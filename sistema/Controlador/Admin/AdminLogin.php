@@ -20,6 +20,16 @@ class AdminLogin extends Controlador
         parent::__construct('templates/admin/views');
     }
 
+
+    public function index(): void
+    {
+        if ($this->usuario && $this->usuario->level == 3) {
+            Helpers::redirecionar('admin/dashboard');
+        }else{
+            Helpers::redirecionar('admin/login');
+        }
+    }
+
     public function login(): void
     {
         $usuario = UsuarioControlador::usuario();

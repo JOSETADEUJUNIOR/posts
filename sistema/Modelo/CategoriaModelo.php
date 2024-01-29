@@ -2,6 +2,7 @@
 
 namespace sistema\Modelo;
 
+use sistema\Nucleo\Conexao;
 use sistema\Nucleo\Modelo;
 
 /**
@@ -11,17 +12,23 @@ use sistema\Nucleo\Modelo;
  */
 class CategoriaModelo extends Modelo
 {
+
+    protected $schema;
+
     public function __construct()
     {
-        parent::__construct('categorias');
+        $this->schema = $_SESSION['tenant_id'] ?? 'posts';
+        parent::__construct('categorias', $this->schema);
     }
-    
-    public function posts(int $id): ?array
-    {
-        $busca = (new PostModelo())->busca("categoria_id = {$id} AND status = 1");
-        return $busca->resultado(true);
-    }
-     /**
+
+    /**
+     * Retorna o total de posts de uma categoria
+     * @param int $categoriaId
+     * @return int
+     */
+ 
+
+    /**
      * Salva o post com slug
      * @return bool
      */
@@ -30,4 +37,5 @@ class CategoriaModelo extends Modelo
         $this->slug();
         return parent::salvar();
     }
+
 }

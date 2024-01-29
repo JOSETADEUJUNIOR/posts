@@ -11,10 +11,13 @@ use sistema\Nucleo\Modelo;
  */
 class PostModelo extends Modelo
 {
+    protected $schema;
 
-    public function __construct()
+    public function __construct(string $slug = '')
     {
-        parent::__construct('post_fake');
+
+        $this->schema = $_SESSION['tenant_id'] ?? $slug;
+        parent::__construct('posts', $this->schema);
     }
 
     /**
@@ -24,7 +27,7 @@ class PostModelo extends Modelo
     public function categoria(): ?CategoriaModelo
     {
         if ($this->categoria_id) {
-            return (new CategoriaModelo())->buscaPorId($this->categoria_id);
+            return (new CategoriaModelo($this->schema))->buscaPorId($this->categoria_id);
         }
         return null;
     }

@@ -22,15 +22,17 @@ abstract class Modelo
     protected $limite;
     protected $offset;
     protected $mensagem;
+    protected $schema;
 
     /**
      * Construtor da classe
      * @param string $tabela
      */
-    public function __construct(string $tabela)
+    public function __construct(string $tabela, string $schema = 'tenant_2')
     {
         $this->tabela = $tabela;
         $this->mensagem = new Mensagem();
+        $this->schema = $schema;
     }
 
     /**
@@ -136,12 +138,12 @@ abstract class Modelo
     public function busca(?string $termos = null, ?string $parametros = null, string $colunas = '*'): object
     {
         if ($termos) {
-            $this->query = "SELECT {$colunas} FROM " . $this->tabela . " WHERE {$termos} ";
+            $this->query = "SELECT {$colunas} FROM {$this->schema}.{$this->tabela} WHERE {$termos} ";
             parse_str($parametros, $this->parametros);
             return $this;
         }
 
-        $this->query = "SELECT {$colunas} FROM " . $this->tabela;
+        $this->query = "SELECT {$colunas} FROM {$this->schema}.{$this->tabela}";
         return $this;
     }
 
@@ -153,7 +155,7 @@ abstract class Modelo
     public function resultado(bool $todos = false): mixed
     {
         try {
-            $stmt = Conexao::getInstancia()->prepare($this->query . $this->ordem . $this->limite . $this->offset);
+            $stmt = Conexao::getInstancia($this->schema)->prepare($this->query . $this->ordem . $this->limite . $this->offset);
             $stmt->execute($this->parametros);
 
             if (!$stmt->rowCount()) {
@@ -182,12 +184,12 @@ abstract class Modelo
         try {
             $colunas = implode(',', array_keys($dados));
             $valores = ':' . implode(',:', array_keys($dados));
-
-            $query = "INSERT INTO " . $this->tabela . " ({$colunas}) VALUES ({$valores}) ";
-            $stmt = Conexao::getInstancia()->prepare($query);
+    
+            $query = "INSERT INTO {$this->schema}.{$this->tabela} ({$colunas}) VALUES ({$valores}) ";
+            $stmt = Conexao::getInstancia($this->schema)->prepare($query);
             $stmt->execute($this->filtro($dados));
-
-            return Conexao::getInstancia()->lastInsertId();
+    
+            return Conexao::getInstancia($this->schema)->lastInsertId();
         } catch (\PDOException $ex) {
             echo $this->erro = $ex->getMessage();
             return null;
@@ -200,26 +202,27 @@ abstract class Modelo
      * @param string $termos
      * @return int
      */
-    protected function atualizar(array $dados, string $termos): int | bool | null
+    protected function atualizar(array $dados, string $termos): ?int
     {
         try {
             $set = [];
-
+    
             foreach ($dados as $chave => $valor) {
                 $set[] = "{$chave} = :{$chave}";
             }
             $set = implode(', ', $set);
-
-            $query = "UPDATE " . $this->tabela . " SET {$set} WHERE {$termos}";
-            $stmt = Conexao::getInstancia()->prepare($query);
+    
+            $query = "UPDATE {$this->schema}.{$this->tabela} SET {$set} WHERE {$termos}";
+            $stmt = Conexao::getInstancia($this->schema)->prepare($query);
             $stmt->execute($this->filtro($dados));
-
-            return ($stmt->rowCount() ?? 1);
+    
+            return $stmt->rowCount();
         } catch (\PDOException $ex) {
             $this->erro = $ex->getMessage();
             return null;
         }
     }
+    
 
     /**
      * Filtra os dados
@@ -277,16 +280,17 @@ abstract class Modelo
     public function apagar(string $termos): bool
     {
         try {
-            $query = "DELETE FROM " . $this->tabela . " WHERE {$termos}";
-            $stmt = Conexao::getInstancia()->prepare($query);
+            $query = "DELETE FROM {$this->schema}.{$this->tabela} WHERE {$termos}";
+            $stmt = Conexao::getInstancia($this->schema)->prepare($query);
             $stmt->execute();
-
+    
             return true;
         } catch (\PDOException $ex) {
             $this->erro = $ex->getMessage();
-            return null;
+            return false; // Retorne false em vez de null para indicar falha
         }
     }
+    
 
     /**
      * Deleta um registro pelo ID
@@ -308,7 +312,7 @@ abstract class Modelo
      */
     public function total(): int
     {
-        $stmt = Conexao::getInstancia()->prepare($this->query);
+        $stmt = Conexao::getInstancia($this->schema)->prepare($this->query);
         $stmt->execute($this->parametros);
         return $stmt->rowCount();
     }
@@ -348,8 +352,10 @@ abstract class Modelo
      */
     private function ultimoId():int
     {
-        return Conexao::getInstancia()->query("SELECT MAX(id) as maximo FROM {$this->tabela}")->fetch()->maximo +1;
+        $query = "SELECT MAX(id) as maximo FROM {$this->schema}.{$this->tabela}";
+        return Conexao::getInstancia($this->schema)->query($query)->fetch()->maximo + 1;
     }
+    
     
     /**
      * Checa e monta Slug - Url amigavél

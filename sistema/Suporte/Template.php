@@ -45,9 +45,9 @@ class Template
      * Metodo responsavel por chamar funções da classe Helpers
      * @return void
      */
-    private function helpers(): void
+    private function helpers(): array
     {
-        array(
+        return [
             $this->twig->addFunction(
                     new \Twig\TwigFunction('url', function (string $url = null) {
                                 return Helpers::url($url);
@@ -85,11 +85,11 @@ class Template
             ),
             $this->twig->addFunction(
                 new \Twig\TwigFunction('tempoCarregamento', function () {
-                            $time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
-                            return number_format($time, 4);
+                            $time = microtime(true) - filter_var($_SERVER["REQUEST_TIME_FLOAT"],FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+                            return number_format($time, 2);
                         })
         ),
-        );
+    ];
     }
 
 }

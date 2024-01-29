@@ -13,6 +13,20 @@ use sistema\Nucleo\Sessao;
  */
 class Helpers
 {
+
+
+    public static function json(string $chave, string $valor): void
+    {
+        header('Content-Type: application/json');
+        
+        $json[$chave] = $valor;
+        echo json_encode($json);
+        
+        exit();
+    }
+
+
+
     /**
      * Valida a senha
      * @param string $senha
@@ -172,8 +186,11 @@ class Helpers
         $servidor = filter_input(INPUT_SERVER, 'SERVER_NAME');
         $ambiente = ($servidor == 'localhost' ? URL_DESENVOLVIMENTO : URL_PRODUCAO);
 
-        if (str_starts_with($url, '/')) {
-            return $ambiente . $url;
+        if (!empty($url)) {
+            if (str_starts_with($url, '/')) {
+                return $ambiente . $url;
+            }
+            
         }
         return $ambiente . '/' . $url;
     }

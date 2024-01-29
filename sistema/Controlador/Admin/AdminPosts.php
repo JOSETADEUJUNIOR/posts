@@ -16,25 +16,80 @@ class AdminPosts extends AdminControlador
 {
 
     private string $capa;
+    private string $video;
 
-    /**
-     * Lista posts
-     * @return void
-     */
+
+    public function datatable(): void
+    {
+        $datatable = $_REQUEST;
+        $datatable = filter_var_array($datatable, FILTER_SANITIZE_SPECIAL_CHARS);
+
+        $limite = $datatable['length'];
+        $offset = $datatable['start'];
+        $busca = $datatable['search']['value'];
+
+        $colunas = [
+            0 => 'id',
+            2 => 'titulo',
+            3 => 'categoria_id',
+            4 => 'visitas',
+            5 => 'status',
+        ];
+
+        $ordem = " " . $colunas[$datatable['order'][0]['column']] . " ";
+        $ordem .= " " . $datatable['order'][0]['dir'] . " ";
+
+        $posts = new PostModelo();
+
+        if (empty($busca)) {
+            $posts->busca()->ordem($ordem)->limite($limite)->offset($offset);
+            $total = (new PostModelo())->busca(null, 'COUNT(id)', 'id')->total();
+        } else {
+            $posts->busca("id LIKE '%{$busca}%' OR titulo LIKE '%{$busca}%' ")->limite($limite)->offset($offset);
+            $total = $posts->total();
+        }
+
+        $dados = [];
+
+        if ($posts->resultado(true)) {
+            foreach ($posts->resultado(true) as $post) {
+                $dados[] = [
+                    $post->id,
+                    $post->capa,
+                    $post->titulo,
+                    $post->categoria()->titulo ?? '-----',
+                    Helpers::formatarNumero($post->visitas),
+                    $post->status
+                ];
+            }
+        }
+
+
+        $retorno = [
+            "draw" => $datatable['draw'],
+            "recordsTotal" => $total,
+            "recordsFiltered" => $total,
+            "data" => $dados
+        ];
+
+        echo json_encode($retorno);
+    }
+
+
+
+
     public function listar(): void
     {
-        $post = new PostModelo();
+        $posts = new PostModelo();
 
         echo $this->template->renderizar('posts/listar.html', [
-            'posts' => $post->busca()->ordem('status ASC, id DESC')->resultado(true),
             'total' => [
-                'posts' => $post->total(),
-                'postsAtivo' => $post->busca('status = 1')->total(),
-                'postsInativo' => $post->busca('status = 0')->total()
+                'posts' => $posts->busca(null, 'COUNT(id)', 'id')->total(),
+                'postsAtivo' => $posts->busca('status = :s', 's=1 COUNT(status))', 'status')->total(),
+                'postsInativo' => $posts->busca('status = :s', 's=0 COUNT(status)', 'status')->total(),
             ]
         ]);
     }
-
     /**
      * Cadastra posts
      * @return void
@@ -46,7 +101,6 @@ class AdminPosts extends AdminControlador
 
             if ($this->validarDados($dados)) {
                 $post = new PostModelo();
-
                 $post->usuario_id = $this->usuario->id;
                 $post->categoria_id = $dados['categoria_id'];
                 $post->slug = Helpers::slug($dados['titulo']);
@@ -54,6 +108,8 @@ class AdminPosts extends AdminControlador
                 $post->texto = $dados['texto'];
                 $post->status = $dados['status'];
                 $post->capa = $this->capa ?? null;
+                $post->capa_ativa = $dados['capa_ativa'];
+                $post->video = $this->video ?? null;
 
                 if ($post->salvar()) {
                     $this->mensagem->sucesso('Post cadastrado com sucesso')->flash();
@@ -93,8 +149,10 @@ class AdminPosts extends AdminControlador
                 $post->texto = $dados['texto'];
                 $post->status = $dados['status'];
                 $post->atualizado_em = date('Y-m-d H:i:s');
+                $post->capa_ativa = $dados['capa_ativa'];
 
-                if (!empty($_FILES['capa'])) {
+                //atualizar a capa no DB e no servidor, se um novo arquivo de imagem for enviado
+                if (!empty($_FILES['capa']["name"])) {
                     if ($post->capa && file_exists("uploads/imagens/{$post->capa}")) {
                         unlink("uploads/imagens/{$post->capa}");
                         unlink("uploads/imagens/thumbs/{$post->capa}");
@@ -102,6 +160,13 @@ class AdminPosts extends AdminControlador
                     $post->capa = $this->capa ?? null;
                 }
 
+                if (!empty($_FILES['video']["name"])) {
+                    if ($post->video && file_exists("uploads/videos/{$post->video}")) {
+                        unlink("uploads/videos/{$post->video}");
+                        unlink("uploads/videos/thumbs/{$post->video}");
+                    }
+                    $post->video = $this->video ?? null;
+                }
                 if ($post->salvar()) {
                     $this->mensagem->sucesso('Post atualizado com sucesso')->flash();
                     Helpers::redirecionar('admin/posts/listar');
@@ -159,6 +224,33 @@ class AdminPosts extends AdminControlador
                 }
             }
         }
+
+        if (!empty($_FILES['video'])) {
+            $upload = new Upload($_FILES['video'], 'pt_BR');
+            if ($upload->uploaded) {
+                $titulo = $upload->file_new_name_body = Helpers::slug($dados['titulo']);
+                $upload->jpeg_quality = 90;
+                $upload->image_convert = 'jpg';
+                $upload->process('uploads/videos/');
+
+                if ($upload->processed) {
+                    $this->video = $upload->file_dst_name;
+                    $upload->file_new_name_body = $titulo;
+                    $upload->image_resize = true;
+                    $upload->image_x = 540;
+                    $upload->image_y = 304;
+                    $upload->jpeg_quality = 70;
+                    $upload->image_convert = 'jpg';
+                    $upload->process('uploads/videos/thumbs/');
+                    $upload->clean();
+                } else {
+                    $this->mensagem->alerta($upload->error)->flash();
+                    return false;
+                }
+            }
+        }
+        
+        
 
         return true;
     }

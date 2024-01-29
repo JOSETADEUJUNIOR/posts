@@ -2,6 +2,10 @@
 {% block conteudo %}
 
 <div class="container my-5">
+    
+    <div class="my-3">
+        {{flash()}}
+    </div>
 
     <div class="row">
         <div class="col-lg-9 col-md-12">
@@ -20,13 +24,11 @@
                         {%else%}
                         <div class='carousel-item'>
                             {%endif%}
-                            <a href="{{url('post/'~slide.slug)}}" tooltip="tooltip" title="{{slide.titulo}}">
+                            <a href="{{url('post/'~slide.categoria.slug~'/'~slide.slug)}}" tooltip="tooltip" title="{{slide.titulo}}">
                                 {% if slide.capa %}
-                                <img src="{{url('uploads/imagens/'~slide.capa)}}" class="d-block w-100" alt="{{slide.titulo}}">
+                                <img src="{{url('uploads/imagens/'~slide.capa)}}" class="slide" alt="{{slide.titulo}}">
                                 {% endif %}
                                 <div class="carousel-caption d-none d-md-block">
-                                    <h5>{{slide.titulo}}</h5>
-                                    <p>{{resumirTexto(slide.texto, 100) |raw}}</p>
                                 </div>
                             </a>
                         </div>
@@ -53,12 +55,12 @@
                     <div class="col-md-6 mb-4">
                         <div class="card border-0 h-100">
                             {% if post.capa %}
-                            <a href="{{url('post/'~post.slug)}}" tooltip="tooltip" title="{{post.titulo}}">
+                            <a href="{{url('post/'~post.categoria.slug~'/'~post.slug)}}" tooltip="tooltip" title="{{post.titulo}}">
                                 <img src="{{url('uploads/imagens/thumbs/'~post.capa)}}" alt="{{post.titulo}}" title="{{post.titulo}}" class="capaGrande card-img-top p-3"/>           
                             </a>
                             {% endif %}
                             <div class="card-body">
-                                <a href="{{url('post/'~post.slug)}}" tooltip="tooltip" title="{{post.titulo}}">
+                                <a href="{{url('post/'~post.categoria.slug~'/'~post.slug)}}" tooltip="tooltip" title="{{post.titulo}}">
 
                                     <h4 class="card-title">{{post.titulo}}</h4>
 
@@ -92,17 +94,18 @@
             </div>
 
             <div class="col-lg-3">
-                {% include'sidebar.html '%}
+                {% include 'sidebar.html' %}
 
-                <div class="card mb-4">
+                <div class="card border-0 mb-4">
                     <div class="card-header fw-bold bg-white text-secondary">
                         Mais Lidos
                     </div>
                     <div class="card-body">
+                        {% if posts.maisLidos %}
                         <ul class="list-group list-group-flush">
                             {% for post in posts.maisLidos %}
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="{{url('post/'~post.slug)}}" class="fw-bold" tooltip="tooltip" title="{{post.titulo}}">
+                                <a href="{{url('post/'~post.categoria.slug~'/'~post.slug)}}" class="fw-bold" tooltip="tooltip" title="{{post.titulo}}">
                                     <div class="d-flex align-items-center">
                                         <div class="fw-bold fs-1 text-secondary">
                                             {{loop.index}}
@@ -117,12 +120,19 @@
                             </li>
                             {% endfor %}
                         </ul>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            Nenhum post cadastrado!
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
 
         </div>
 
+    </div>
+    
     </div>
 
     {% endblock %}
