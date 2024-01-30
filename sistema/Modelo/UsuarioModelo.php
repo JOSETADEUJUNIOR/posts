@@ -83,4 +83,15 @@ class UsuarioModelo extends Modelo
             
         return true;
     }
+
+    /**
+     * Busca usuário por e-mail
+     * @param string $email
+     * @return UsuarioModelo|null
+     */
+    public function buscaPorToken(string $token): ?UsuarioModelo
+    {
+        $busca = $this->busca("token = :t","t={$token}");
+        return $busca->resultado();
+    }
 }

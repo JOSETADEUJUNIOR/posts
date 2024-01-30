@@ -17,7 +17,8 @@ class CategoriaModelo extends Modelo
 
     public function __construct()
     {
-        $this->schema = $_SESSION['tenant_id'] ?? 'posts';
+      /*   $this->schema = $_SESSION['tenant_id'] ?? 'posts'; */
+        $this->schema = 'tenant_2';
         parent::__construct('categorias', $this->schema);
     }
 

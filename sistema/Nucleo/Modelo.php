@@ -350,11 +350,11 @@ abstract class Modelo
      * Retorna o ultimo ID da tabela
      * @return int
      */
-    private function ultimoId():int
+    public function ultimoId(): int
     {
-        $query = "SELECT MAX(id) as maximo FROM {$this->schema}.{$this->tabela}";
-        return Conexao::getInstancia($this->schema)->query($query)->fetch()->maximo + 1;
+        return Conexao::getInstancia($this->schema)->query("SELECT MAX(id) as maximo FROM {$this->tabela}")->fetch()->maximo;
     }
+
     
     
     /**

@@ -2,7 +2,6 @@
 
 namespace sistema\Suporte;
 
-use Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 
 /**
@@ -69,7 +68,7 @@ final class Email
 
         $this->mail->Subject = $assunto;
         $this->mail->Body = $conteudo;
-        $this->mail->isHTML($conteudo);
+        //$this->mail->isHTML($conteudo);
 
         $this->mail->addAddress($destinatarioEmail, $destinatarioNome);
 
@@ -97,7 +96,7 @@ final class Email
 
             $this->mail->send();
             return true;
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             $ex = $this->mail->ErrorInfo;
 
             return false;

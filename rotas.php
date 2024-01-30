@@ -7,7 +7,7 @@ try {
     //ROTAS SITE
     SimpleRouter::setDefaultNamespace('sistema\Controlador');
 
-    SimpleRouter::get(URL_SITE . '{slug}', 'SiteControlador@index');
+    SimpleRouter::get(URL_SITE, 'SiteControlador@index');
     SimpleRouter::get(URL_SITE . 'index.php', 'SiteControlador@index');
     SimpleRouter::get(URL_SITE . 'sobre-nos', 'SiteControlador@sobre');
     SimpleRouter::get(URL_SITE . 'post/{categoria}/{slug}', 'SiteControlador@post');
@@ -16,6 +16,18 @@ try {
     SimpleRouter::get(URL_SITE . 'categoria/{slug}/{pagina?}', 'SiteControlador@categoria');
     SimpleRouter::post(URL_SITE . 'buscar', 'SiteControlador@buscar');
     SimpleRouter::get(URL_SITE . '404', 'SiteControlador@erro404');
+
+
+    //USUARIO
+    SimpleRouter::match(['get','post'], URL_SITE . 'cadastro', 'UsuarioControlador@cadastro');
+    SimpleRouter::post(URL_SITE . 'login', 'UsuarioControlador@login');
+    SimpleRouter::match(['get','post'], URL_SITE . 'usuario/confirmar/email/{token}', 'UsuarioControlador@confirmarEmail');
+
+
+    // SAAS
+    SimpleRouter::get(URL_SITE . 'saas', 'SaasControlador@index');
+    SimpleRouter::get(URL_SITE . 'saas/cadastrar', 'SaasControlador@cadastrar');
+
 
     //ROTAS ADMIN
     SimpleRouter::group(['namespace' => 'Admin'], function () {

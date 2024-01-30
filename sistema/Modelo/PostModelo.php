@@ -16,7 +16,8 @@ class PostModelo extends Modelo
     public function __construct(string $slug = '')
     {
 
-        $this->schema = $_SESSION['tenant_id'] ?? $slug;
+/*         $this->schema = $_SESSION['tenant_id'] ?? $slug; */
+        $this->schema = $slug;
         parent::__construct('posts', $this->schema);
     }
 
